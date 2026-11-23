@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hôm nay ăn gì?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF8F1; --card:#FFFFFF; --ink:#2B1D14; --muted:#8A7565; --line:#F0E2D3;
+  --brand:#E8572A; --brand-ink:#fff; --brand-soft:#FDE7DC; --ok:#2E8B57; --ok-soft:#E3F3EA;
+  --chip:#F7ECE1; --shadow:0 6px 24px rgba(120,60,20,.10);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Be Vietnam Pro",system-ui,sans-serif;font-size:16px}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input{font-family:inherit;font-size:16px}
+.app{max-width:480px;margin:0 auto;min-height:100vh;padding:20px 16px 96px}
+h1{font-size:26px;line-height:1.2;margin:4px 0 4px;font-weight:800;letter-spacing:-.02em}
+h2{font-size:20px;margin:0 0 12px;font-weight:700}
+.sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+.label{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:18px 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:9px 14px;border-radius:999px;background:var(--chip);font-size:15px;font-weight:500;transition:.15s;border:1.5px solid transparent}
+.chip.on{background:var(--brand-soft);border-color:var(--brand);color:#B23A12;font-weight:600}
+.seg{display:flex;background:var(--chip);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;padding:10px 0;border-radius:10px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.big{width:100%;margin-top:22px;padding:18px;border-radius:18px;background:var(--brand);color:var(--brand-ink);font-size:19px;font-weight:700;box-shadow:0 8px 20px rgba(232,87,42,.35);transition:transform .1s}
+.big:active{transform:scale(.98)}
+.big:disabled{opacity:.5}
+.hint{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
+.result{margin-top:18px;background:var(--card);border-radius:22px;padding:22px 20px;box-shadow:var(--shadow);text-align:center;animation:pop .25s ease}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+.result .kicker{font-size:13px;color:var(--muted);font-weight:600}
+.result .dish{font-size:28px;font-weight:800;margin:6px 0 10px;line-height:1.2;letter-spacing:-.01em}
+.result .dish.spin{color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.tag{font-size:12px;padding:4px 10px;border-radius:999px;background:var(--chip);color:#6B5545;font-weight:500}
+.row{display:flex;gap:10px;margin-top:18px}
+.btn{flex:1;padding:14px;border-radius:14px;font-weight:600;background:var(--chip)}
+.btn.ok{background:var(--ok);color:#fff}
+.btn.primary{background:var(--brand);color:#fff}
+.link{margin-top:14px;font-size:13px;color:var(--muted);text-decoration:underline}
+.done{background:var(--ok-soft);color:var(--ok);padding:12px;border-radius:12px;font-weight:600;margin-top:16px}
+.empty{background:var(--card);border-radius:18px;padding:20px;text-align:center;margin-top:18px;box-shadow:var(--shadow)}
+.empty p{margin:0 0 12px;color:var(--muted)}
+.nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:8px 0 calc(8px + env(safe-area-inset-bottom))}
+.nav .in{max-width:480px;margin:0 auto;display:flex}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);font-weight:500;padding:4px 0}
+.nav button .ic{font-size:21px;filter:grayscale(1);opacity:.6}
+.nav button.on{color:var(--brand);font-weight:700}
+.nav button.on .ic{filter:none;opacity:1}
+.card{background:var(--card);border-radius:18px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.field{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);background:#fff;outline:none}
+.field:focus{border-color:var(--brand)}
+.list{background:var(--card);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.item .nm{font-weight:600;font-size:15px}
+.item .mt{font-size:12px;color:var(--muted);margin-top:2px}
+.item .grow{flex:1;min-width:0}
+.item.off .nm{color:var(--muted);text-decoration:line-through}
+.mini{padding:7px 11px;border-radius:10px;background:var(--chip);font-size:13px;font-weight:600;white-space:nowrap}
+.mini.warn{background:#FCE4E4;color:#B42318}
+.sec{font-size:13px;font-weight:700;color:var(--muted);margin:20px 4px 8px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;z-index:9;animation:pop .2s}
+.center{display:flex;align-items:center;justify-content:center;min-height:60vh;color:var(--muted)}
+.hello{font-size:15px;color:var(--muted);font-weight:500}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="app" id="app"><div class="center">Đang tải…</div></div>
+<div class="nav" id="nav" hidden><div class="in">
+  <button data-tab="pick"><span class="ic">🎲</span>Chọn món</button>
+  <button data-tab="list"><span class="ic">📋</span>Danh sách</button>
+  <button data-tab="hist"><span class="ic">🕘</span>Lịch sử</button>
+  <button data-tab="prof"><span class="ic">👤</span>Hồ sơ</button>
+</div></div>
+
+<script>
+/* ---------- Dữ liệu món mặc định ----------
+ [tên, bữa (s=sáng t=trưa o=tối), kiểu (o=ăn ngoài d=đặt giao h=tự nấu c=cơm VP), giá (1 <50k, 2 50–100k, 3 >100k), n=có nước k=khô, thành phần] */
+const BASE = [
+["Phở bò","sto","od",2,"n","bo"],["Phở gà","sto","od",2,"n","ga"],["Bún bò Huế","sto","od",2,"n","bo heo cay"],
+["Hủ tiếu Nam Vang","sto","od",2,"n","heo hs"],["Hủ tiếu gõ","so","o",1,"n","heo"],["Bánh mì thịt","st","od",1,"k","heo"],
+["Bánh mì ốp la","s","oh",1,"k","chay"],["Bánh mì chảo","s","o",2,"k","bo heo"],["Xôi mặn","s","o",1,"k","heo ga"],
+["Xôi đậu xanh / xôi bắp","s","o",1,"k","chay"],["Bánh cuốn","s","od",1,"k","heo"],["Bánh bao","s","oc",1,"k","heo"],
+["Cháo lòng","so","o",1,"n","heo nt"],["Cháo gà","so","odh",1,"n","ga"],["Cháo sườn","s","o",1,"n","heo"],
+["Bún riêu cua","st","od",1,"n","hs"],["Bún mọc","s","o",1,"n","heo"],["Bánh canh cua","sto","od",2,"n","hs"],
+["Bánh canh chả cá","st","o",1,"n","hs"],["Mì Quảng","st","od",2,"n","heo hs"],["Bún chay / phở chay","sto","od",1,"n","chay"],
+["Yến mạch sữa chua trái cây","s","h",1,"k","chay"],["Mì gói trứng","so","h",1,"n",""],["Cơm tấm sườn bì chả","sto","odc",1,"k","heo"],
+["Cơm gà xối mỡ","to","odc",1,"k","ga"],["Cơm gà Hải Nam","to","od",2,"k","ga"],["Cơm văn phòng 2 món + canh","t","dc",1,"k",""],
+["Cơm chay","to","odc",1,"k","chay"],["Cơm chiên dương châu","to","odh",1,"k","heo hs"],["Cơm rang dưa bò","to","od",2,"k","bo"],
+["Bún thịt nướng","to","odc",1,"k","heo"],["Bún chả Hà Nội","to","od",2,"k","heo"],["Bún đậu mắm tôm","to","od",2,"k","heo hs"],
+["Bún bò Nam Bộ","to","od",2,"k","bo"],["Bún cá","t","od",1,"n","hs"],["Bún mắm","to","od",2,"n","hs heo cay"],
+["Bún Thái","to","od",2,"n","hs cay"],["Mì xào bò","to","odh",2,"k","bo"],["Bánh xèo","to","od",2,"k","heo hs"],
+["Gỏi cuốn","to","od",1,"k","heo hs"],["Bánh ướt / bánh hỏi","st","o",1,"k","heo"],["Bò kho bánh mì","sto","od",2,"n","bo"],
+["Cơm niêu cá kho","to","od",2,"k","hs"],["Mì cay Hàn Quốc","to","od",2,"n","hs bo cay"],["Cơm trộn Hàn Quốc","to","od",2,"k","bo"],
+["Cơm cà ri Nhật","to","od",2,"k","heo"],["Ramen","to","od",3,"n","heo"],["Sushi / cơm cuộn","to","od",3,"k","hs"],
+["Gà rán","to","od",2,"k","ga"],["Burger","to","od",2,"k","bo"],["Pizza","to","od",3,"k","heo"],
+["Salad ức gà","to","odh",2,"k","ga"],["Bò bít tết","to","o",2,"k","bo"],["Mì vịt tiềm","to","od",2,"n","vit"],
+["Cơm vịt quay","to","od",2,"k","vit"],["Dimsum","so","od",2,"k","heo hs"],["Lẩu Thái","o","o",3,"n","hs cay"],
+["Lẩu bò","o","o",3,"n","bo"],["Lẩu gà lá é","o","o",3,"n","ga"],["Lẩu nấm chay","o","o",3,"n","chay"],
+["Nướng BBQ","o","o",3,"k","bo heo"],["Hải sản nướng","o","o",3,"k","hs"],["Ốc các món","o","o",2,"k","hs cay"],
+["Gà nướng muối ớt","o","od",3,"k","ga cay"],["Phá lấu","o","o",1,"n","bo nt"],["Bánh tráng nướng / trộn","o","o",1,"k",""],
+["Thịt kho trứng + canh","to","h",1,"k","heo"],["Cá kho tộ + canh chua","to","h",1,"k","hs"],["Gà kho gừng","to","h",1,"k","ga"],
+["Bò xào rau củ","to","h",2,"k","bo"],["Sườn ram mặn","to","h",1,"k","heo"],["Canh bí đỏ thịt bằm","to","h",1,"n","heo"],
+["Đậu hũ sốt cà chua","to","hc",1,"k","chay"],["Trứng chiên + canh rau","sto","h",1,"k","chay"],["Rau muống xào tỏi + cơm","to","h",1,"k","chay"],
+["Tôm rim mặn ngọt","to","h",2,"k","hs"],["Mì Ý sốt bò bằm","to","hd",2,"k","bo"],["Cháo trắng hột vịt muối","so","h",1,"n","chay"],
+["Bún gạo xào chay","to","h",1,"k","chay"],["Nui xào bò","so","h",1,"k","bo"]
+].map((d,i)=>({id:"b"+i,n:d[0],m:d[1],w:d[2],p:d[3],f:d[4],g:d[5]?d[5].split(" "):[]}));
+
+const MEALS={s:"Sáng",t:"Trưa",o:"Tối"};
+const WAYS={o:"Ăn ngoài",d:"Đặt giao",h:"Tự nấu",c:"Cơm VP"};
+const PRICES={1:"< 50k",2:"50–100k",3:"> 100k"};
+const FORMS={n:"Có nước",k:"Khô"};
+const EXCL=[["cay","Không ăn cay"],["hs","Hải sản"],["bo","Thịt bò"],["heo","Thịt heo"],["ga","Gà"],["vit","Vịt"],["nt","Nội tạng"]];
+const ING=[["cay","Cay"],["hs","Hải sản"],["bo","Bò"],["heo","Heo"],["ga","Gà"],["vit","Vịt"],["nt","Nội tạng"],["chay","Món chay"]];
+const KEY="angi_state_v1";
+
+/* ---------- State & lưu trữ ---------- */
+function fresh(){return {v:1,updated:0,profile:{name:"",excl:[],veg:false,kw:[],avoid:3,onboarded:false},history:[],custom:[],hidden:[],filters:{ways:[],price:0,form:""}};}
+function lsGet(){try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){return null}}
+function lsSet(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
+function merge(s){const b=fresh();if(!s||typeof s!=="object")return b;return {...b,...s,profile:{...b.profile,...(s.profile||{})},filters:{...b.filters,...(s.filters||{})},history:Array.isArray(s.history)?s.history:[],custom:Array.isArray(s.custom)?s.custom:[],hidden:Array.isArray(s.hidden)?s.hidden:[]};}
+let state=merge(lsGet());
+let ref=null, cloudDead=false, saving=false, pending=false;
+
+async function save(){
+  state.updated=Date.now(); lsSet(state);
+  if(!ref||cloudDead) return;
+  if(saving){pending=true;return;}
+  saving=true;
+  try{await ref.set({state:JSON.parse(JSON.stringify(state))});}
+  catch(e){const c=e&&e.code; if(c==="invalid_argument"||c==="revoked"||c==="not_granted"||c==="capability_disabled"||c==="quota_exceeded") cloudDead=true;}
+  saving=false;
+  if(pending){pending=false;save();}
+}
+function timeout(p,ms){return Promise.race([p,new Promise((_,r)=>setTimeout(()=>r({code:"timeout"}),ms))]);}
+async function initCloud(){
+  try{
+    if(!window.claude||!claude.use) return;
+    const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
+    if(!db||!user) return;
+    const id=await user.id(); if(!id) return;
+    ref=db.doc("data/users/"+id+"/state");
+    const snap=await timeout(ref.get(),10000);
+    const remote=snap.exists&&snap.data()?snap.data().state:null;
+    if(remote&&(remote.updated||0)>=(state.updated||0)){state=merge(JSON.parse(JSON.stringify(remote)));lsSet(state);}
+    else if(state.profile.onboarded){save();}
+  }catch(e){ ref=null; }
+}
+
+/* ---------- Tiện ích ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm=s=>String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").trim();
+function curMeal(){const h=new Date().getHours();return h<10?"s":h<15?"t":"o";}
+function allDishes(){return BASE.concat(state.custom);}
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1800);}
+function fmtTime(t){const d=new Date(t);const today=new Date();const y=new Date();y.setDate(today.getDate()-1);
+  const hm=d.toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"});
+  if(d.toDateString()===today.toDateString())return "Hôm nay, "+hm;
+  if(d.toDateString()===y.toDateString())return "Hôm qua, "+hm;
+  return d.toLocaleDateString("vi-VN",{weekday:"short",day:"2-digit",month:"2-digit"})+", "+hm;}
+function metaTags(d){return [Object.keys(MEALS).filter(k=>d.m.includes(k)).map(k=>MEALS[k]).join(" · "),
+  Object.keys(WAYS).filter(k=>d.w.includes(k)).map(k=>WAYS[k]).join(" / "),PRICES[d.p],FORMS[d.f]].filter(Boolean);}
+
+function profileOK(d){
+  const p=state.profile;
+  if(p.veg&&!d.g.includes("chay")) return false;
+  if(d.g.some(t=>p.excl.includes(t))) return false;
+  const nn=norm(d.n);
+  if(p.kw.some(k=>k&&nn.includes(norm(k)))) return false;
+  return true;
+}
+function recentIds(){const days=+state.profile.avoid||0;if(!days)return new Set();const cut=Date.now()-days*864e5;
+  return new Set(state.history.filter(h=>h.t>=cut).map(h=>h.id));}
+
+/* ---------- Màn chọn món ---------- */
+let ui={tab:"pick",meal:curMeal(),result:null,skip:[],spinning:false,chosen:false,listQ:"",clearArm:false,addOpen:false};
+
+function candidates(opts={}){
+  const f=state.filters, recent=opts.noRecent?new Set():recentIds();
+  return allDishes().filter(d=>!state.hidden.includes(d.id)&&d.m.includes(ui.meal)&&profileOK(d)
+    &&(!f.ways.length||f.ways.some(w=>d.w.includes(w)))
+    &&(opts.noPrice||!f.price||d.p===f.price)
+    &&(!f.form||d.f===f.form)
+    &&!recent.has(d.id));
+}
+
+function renderPick(){
+  const f=state.filters, pool=candidates(), recentN=candidates({noRecent:true}).length-pool.length;
+  const nm=state.profile.name?`Chào ${esc(state.profile.name)} 👋`:"Chào bạn 👋";
+  let h=`<div class="hello">${nm}</div><h1>Bữa ${MEALS[ui.meal].toLowerCase()} nay ăn gì?</h1><p class="sub">Bấm một nút, khỏi phải nghĩ.</p>
+  <div class="seg" id="meal">${Object.entries(MEALS).map(([k,v])=>`<button data-k="${k}" class="${ui.meal===k?"on":""}">${v}</button>`).join("")}</div>
+  <div class="label">Kiểu ăn</div><div class="chips" id="ways">${Object.entries(WAYS).map(([k,v])=>`<button class="chip ${f.ways.includes(k)?"on":""}" data-k="${k}">${v}</button>`).join("")}</div>
+  <div class="label">Giá</div><div class="chips" id="price"><button class="chip ${!f.price?"on":""}" data-k="0">Tất cả</button>${Object.entries(PRICES).map(([k,v])=>`<button class="chip ${f.price==k?"on":""}" data-k="${k}">${v}</button>`).join("")}</div>
+  <div class="label">Món</div><div class="chips" id="form"><button class="chip ${!f.form?"on":""}" data-k="">Tất cả</button>${Object.entries(FORMS).map(([k,v])=>`<button class="chip ${f.form===k?"on":""}" data-k="${k}">${v}</button>`).join("")}</div>`;
+  if(pool.length){
+    h+=`<button class="big" id="go" ${ui.spinning?"disabled":""}>🎲 Chọn giùm tôi</button>
+    <div class="hint">Đang chọn trong ${pool.length} món${recentN>0?` · đã bỏ ${recentN} món ăn trong ${state.profile.avoid} ngày qua`:""}</div>`;
+  }else{
+    h+=`<div class="empty"><p>Không còn món nào khớp bộ lọc 🤔</p><button class="btn primary" id="relax">Bỏ bớt lọc giá & món</button></div>`;
+  }
+  if(ui.result){
+    const d=ui.result;
+    h+=`<div class="result"><div class="kicker">${ui.spinning?"Đang chọn…":ui.chosen?"Chốt rồi! Chúc ngon miệng 😋":"Hôm nay ăn"}</div>
+    <div class="dish ${ui.spinning?"spin":""}" id="dish">${esc(d.n)}</div>
+    ${ui.spinning?"":`<div class="meta">${metaTags(d).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>
+    ${ui.chosen?`<div class="row"><button class="btn" id="again">Chọn lại bữa khác</button></div>`:
+    `<div class="row"><button class="btn" id="next">🔄 Món khác</button><button class="btn ok" id="ok">✅ Chốt món này</button></div>
+    <button class="link" id="never">Đừng bao giờ gợi ý món này</button>`}`}
+    </div>`;
+  }
+  $("#app").innerHTML=h;
+
+  $("#meal").onclick=e=>{const k=e.target.dataset.k;if(!k)return;ui.meal=k;ui.result=null;ui.skip=[];render();};
+  $("#ways").onclick=e=>{const k=e.target.dataset.k;if(!k)return;const w=state.filters.ways;state.filters.ways=w.includes(k)?w.filter(x=>x!==k):[...w,k];ui.skip=[];save();render();};
+  $("#price").onclick=e=>{const k=e.target.dataset.k;if(k==null)return;state.filters.price=+k;ui.skip=[];save();render();};
+  $("#form").onclick=e=>{const k=e.target.dataset.k;if(k==null)return;state.filters.form=k;ui.skip=[];save();render();};
+  if($("#go"))$("#go").onclick=()=>{ui.skip=[];spin();};
+  if($("#relax"))$("#relax").onclick=()=>{state.filters.price=0;state.filters.form="";save();render();};
+  if($("#next"))$("#next").onclick=()=>{ui.skip.push(ui.result.id);spin();};
+  if($("#ok"))$("#ok").onclick=()=>{const d=ui.result;state.history.unshift({id:d.id,n:d.n,meal:ui.meal,t:Date.now()});state.history=state.history.slice(0,100);ui.chosen=true;save();render();};
+  if($("#again"))$("#again").onclick=()=>{ui.result=null;ui.chosen=false;ui.skip=[];render();window.scrollTo({top:0,behavior:"smooth"});};
+  if($("#never"))$("#never").onclick=()=>{state.hidden.push(ui.result.id);ui.skip.push(ui.result.id);save();toast("Đã ẩn “"+ui.result.n+"”");spin();};
+}
+
+function spin(){
+  let pool=candidates().filter(d=>!ui.skip.includes(d.id));
+  if(!pool.length){ if(ui.skip.length){ui.skip=ui.result?[ui.result.id]:[];pool=candidates().filter(d=>!ui.skip.includes(d.id));toast("Hết món mới, quay lại từ đầu");} }
+  if(!pool.length){ui.result=null;render();return;}
+  const final=pool[Math.floor(Math.random()*pool.length)];
+  ui.chosen=false;ui.spinning=true;ui.result=final;render();
+  let i=0;const t=setInterval(()=>{const el=$("#dish");if(el)el.textContent=pool[Math.floor(Math.random()*pool.length)].n;
+    if(++i>=11){clearInterval(t);ui.spinning=false;render();}},65);
+  setTimeout(()=>{const r=document.querySelector(".result");if(r)r.scrollIntoView({behavior:"smooth",block:"center"});},50);
+}
+
+/* ---------- Danh sách món ---------- */
+let draft={n:"",m:"",w:"",p:1,f:"k",g:[]};
+function renderList(){
+  const q=norm(ui.listQ);
+  const match=d=>!q||norm(d.n).includes(q);
+  const custom=state.custom.filter(match), base=BASE.filter(match);
+  const row=(d,isCustom)=>{const off=state.hidden.includes(d.id), blocked=!profileOK(d);
+    return `<div class="item ${off?"off":""}"><div class="grow"><div class="nm">${esc(d.n)}</div><div class="mt">${esc(metaTags(d).join(" · "))}${blocked?" · bị loại theo hồ sơ":""}</div></div>
+    ${isCustom?`<button class="mini warn" data-del="${d.id}">Xóa</button>`:""}<button class="mini" data-tog="${d.id}">${off?"Hiện lại":"Ẩn"}</button></div>`;};
+  const chipset=(key,obj,multi)=>Object.entries(obj).map(([k,v])=>{const on=multi?draft[key].includes(k):String(draft[key])===String(k);return `<button class="chip ${on?"on":""}" data-f="${key}" data-k="${k}">${v}</button>`;}).join("");
+  let h=`<h1>Danh sách món</h1><p class="sub">${allDishes().length} món · ẩn món bạn chán, thêm món/quán quen của bạn.</p>
+  <button class="btn primary" style="width:100%;margin-bottom:14px" id="addT">${ui.addOpen?"Đóng":"＋ Thêm món mới"}</button>`;
+  if(ui.addOpen){
+    h+=`<div class="card" id="addF"><input class="field" id="dn" placeholder="Tên món hoặc quán (vd: Phở Lệ)" value="${esc(draft.n)}">
+    <div class="label">Bữa</div><div class="chips">${chipset("m",MEALS,true)}</div>
+    <div class="label">Kiểu ăn</div><div class="chips">${chipset("w",WAYS,true)}</div>
+    <div class="label">Giá</div><div class="chips">${chipset("p",PRICES,false)}</div>
+    <div class="label">Món</div><div class="chips">${chipset("f",FORMS,false)}</div>
+    <div class="label">Có chứa (để lọc theo hồ sơ)</div><div class="chips">${ING.map(([k,v])=>`<button class="chip ${draft.g.includes(k)?"on":""}" data-f="g" data-k="${k}">${v}</button>`).join("")}</div>
+    <button class="big" id="addS">Lưu món</button></div>`;
+  }
+  h+=`<input class="field" id="q" placeholder="🔍 Tìm món…" value="${esc(ui.listQ)}" style="margin-bottom:6px">`;
+  if(custom.length) h+=`<div class="sec">MÓN CỦA BẠN</div><div class="list">${custom.map(d=>row(d,true)).join("")}</div>`;
+  h+=`<div class="sec">MÓN GỢI Ý SẴN</div><div class="list">${base.map(d=>row(d,false)).join("")||'<div class="item"><div class="mt">Không tìm thấy</div></div>'}</div>`;
+  $("#app").innerHTML=h;
+
+  $("#addT").onclick=()=>{ui.addOpen=!ui.addOpen;render();};
+  const qi=$("#q");qi.oninput=()=>{ui.listQ=qi.value;const pos=qi.selectionStart;render();const n=$("#q");n.focus();n.setSelectionRange(pos,pos);};
+  if(ui.addOpen){
+    $("#dn").oninput=e=>draft.n=e.target.value;
+    $("#addF").onclick=e=>{const b=e.target.closest("[data-f]");if(!b)return;const f=b.dataset.f,k=b.dataset.k;
+      if(f==="m"||f==="w")draft[f]=draft[f].includes(k)?draft[f].replace(k,""):draft[f]+k;
+      else if(f==="g")draft.g=draft.g.includes(k)?draft.g.filter(x=>x!==k):[...draft.g,k];
+      else draft[f]=f==="p"?+k:k;
+      render();};
+    $("#addS").onclick=()=>{const n=draft.n.trim();
+      if(!n)return toast("Nhập tên món trước nhé");
+      if(!draft.m)return toast("Chọn ít nhất 1 bữa");
+      if(!draft.w)return toast("Chọn ít nhất 1 kiểu ăn");
+      state.custom.unshift({id:"c"+Date.now().toString(36),n,m:draft.m,w:draft.w,p:draft.p,f:draft.f,g:draft.g.slice()});
+      draft={n:"",m:"",w:"",p:1,f:"k",g:[]};ui.addOpen=false;save();toast("Đã thêm “"+n+"”");render();};
+  }
+  $("#app").querySelectorAll("[data-tog]").forEach(b=>b.onclick=()=>{const id=b.dataset.tog;state.hidden=state.hidden.includes(id)?state.hidden.filter(x=>x!==id):[...state.hidden,id];save();render();});
+  $("#app").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const id=b.dataset.del;state.custom=state.custom.filter(d=>d.id!==id);state.hidden=state.hidden.filter(x=>x!==id);save();render();});
+}
+
+/* ---------- Lịch sử ---------- */
+function renderHist(){
+  const hs=state.history;
+  let h=`<h1>Lịch sử</h1><p class="sub">Món đã chốt trong ${state.profile.avoid} ngày gần nhất sẽ không được gợi ý lại.</p>`;
+  if(!hs.length) h+=`<div class="empty"><p>Chưa có món nào. Chọn và chốt món đầu tiên nhé!</p></div>`;
+  else{
+    h+=`<div class="list">${hs.map((x,i)=>`<div class="item"><div class="grow"><div class="nm">${esc(x.n)}</div><div class="mt">${MEALS[x.meal]||""} · ${fmtTime(x.t)}</div></div><button class="mini" data-rm="${i}">Bỏ</button></div>`).join("")}</div>
+    <button class="btn" style="width:100%;margin-top:14px" id="clr">${ui.clearArm?"Bấm lần nữa để xóa hết":"Xóa toàn bộ lịch sử"}</button>`;
+  }
+  $("#app").innerHTML=h;
+  $("#app").querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{state.history.splice(+b.dataset.rm,1);save();render();});
+  if($("#clr"))$("#clr").onclick=()=>{if(!ui.clearArm){ui.clearArm=true;render();setTimeout(()=>{ui.clearArm=false;if(ui.tab==="hist")render();},3000);return;}
+    state.history=[];ui.clearArm=false;save();render();};
+}
+
+/* ---------- Hồ sơ / onboarding ---------- */
+let pdraft=null;
+function renderProf(onboard){
+  if(!pdraft) pdraft=JSON.parse(JSON.stringify(state.profile));
+  const p=pdraft;
+  let h=onboard?`<div style="font-size:44px;margin-top:10px">🍜</div><h1>Hôm nay ăn gì?</h1><p class="sub">Trả lời nhanh 1 lần, mình sẽ nhớ và không gợi ý những món bạn không ăn. Sửa lại lúc nào cũng được trong mục Hồ sơ.</p>`
+    :`<h1>Hồ sơ</h1><p class="sub">Áp dụng cho mọi lần gợi ý của bạn.</p>`;
+  h+=`<div class="card"><div class="label" style="margin-top:0">Tên gọi (không bắt buộc)</div><input class="field" id="pn" placeholder="Vd: Bảo" value="${esc(p.name)}">
+  <div class="label">Bạn không ăn gì?</div><div class="chips" id="pe">${EXCL.map(([k,v])=>`<button class="chip ${p.excl.includes(k)?"on":""}" data-k="${k}">${v}</button>`).join("")}
+    <button class="chip ${p.veg?"on":""}" data-k="__veg">🥬 Chỉ ăn chay</button></div>
+  <div class="label">Món/nguyên liệu khác muốn loại</div><input class="field" id="pk" placeholder="Vd: mắm tôm, lòng, pizza" value="${esc(p.kw.join(", "))}">
+  <div class="note">Cách nhau bằng dấu phẩy. Món nào có chữ này trong tên sẽ bị loại.</div>
+  <div class="label">Tránh lặp món đã ăn trong</div><div class="chips" id="pa">${[[0,"Không tránh"],[3,"3 ngày"],[7,"7 ngày"]].map(([k,v])=>`<button class="chip ${+p.avoid===k?"on":""}" data-k="${k}">${v}</button>`).join("")}</div>
+  </div><button class="big" id="ps">${onboard?"Bắt đầu chọn món →":"Lưu hồ sơ"}</button>`;
+  if(!onboard) h+=`<p class="note" style="text-align:center;margin-top:14px">Hồ sơ, danh sách món và lịch sử là của riêng bạn – người khác mở cùng link sẽ có bản riêng của họ.</p>`;
+  $("#app").innerHTML=h;
+  $("#pn").oninput=e=>p.name=e.target.value;
+  $("#pk").oninput=e=>p.kw=e.target.value.split(",").map(s=>s.trim()).filter(Boolean);
+  $("#pe").onclick=e=>{const k=e.target.dataset.k;if(!k)return;if(k==="__veg")p.veg=!p.veg;else p.excl=p.excl.includes(k)?p.excl.filter(x=>x!==k):[...p.excl,k];renderProf(onboard);};
+  $("#pa").onclick=e=>{const k=e.target.dataset.k;if(k==null)return;p.avoid=+k;renderProf(onboard);};
+  $("#ps").onclick=()=>{p.name=p.name.trim();p.onboarded=true;state.profile=JSON.parse(JSON.stringify(p));pdraft=null;save();
+    if(onboard){ui.tab="pick";}else toast("Đã lưu hồ sơ");ui.result=null;render();};
+}
+
+/* ---------- Router ---------- */
+function render(){
+  const nav=$("#nav");
+  if(!state.profile.onboarded){nav.hidden=true;renderProf(true);return;}
+  nav.hidden=false;
+  nav.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.tab===ui.tab));
+  if(ui.tab!=="prof")pdraft=null;
+  ({pick:renderPick,list:renderList,hist:renderHist,prof:()=>renderProf(false)})[ui.tab]();
+}
+$("#nav").onclick=e=>{const b=e.target.closest("button");if(!b)return;ui.tab=b.dataset.tab;ui.clearArm=false;render();window.scrollTo(0,0);};
+
+(async function start(){
+  if(state.profile.onboarded){render();initCloud().then(()=>{if(!ui.spinning&&ui.tab!=="prof")render();});}
+  else{await Promise.race([initCloud(),new Promise(r=>setTimeout(r,4000))]);render();}
+})();
+</script>
+</body>
+</html>
